@@ -1,0 +1,48 @@
+syntax="proto3";
+package services;
+import "google/api/annotations.proto";
+import "Models.proto"; // protoc --go_out=plugins=grpc:../services  Models.proto
+// 枚举 ，表示商品区域
+enum ProdAreas {
+  A=0;
+  B=1;
+  C=2;
+}
+message  ProdRequest {
+  int32 prod_id =1;   //传入的商品ID
+  ProdAreas prod_area=2;
+}
+message ProdResponse{
+  int32 prod_stock=1;//商品库存
+}
+
+message QuerySize {
+  int32 size = 1; // 页数量
+}
+// 返回 多个商品库存
+// Repeated:是一个修饰符,返回字段可以重复任意多次（包括0次）
+// go中可以认为就是一个数组(切片)， 其他语言就是个数组
+message ProdResponseList{
+  repeated ProdResponse prodres=1; // ProdResponse: 上面的message，prodres: 自定义变量
+}
+
+// get /v1/prod/{prod_id}
+// http://localhost:8080/v1/prod/123
+service ProdService {
+  // 根据id 获取一个商品库存
+  rpc GetProdStock(ProdRequest) returns (ProdResponse) {
+    // 支持http
+    option (google.api.http) = {
+      get: "/v1/prod/{prod_id}" // prod_id 要与 ProdRequest 的 prod_id 一致
+    };
+  }
+  // 获取多个商品库存
+  rpc GetProdStocks(QuerySize) returns (ProdResponseList) {
+    option (google.api.http) = {
+      get: "/v1/prods/{size}" // size 要与 QuerySize 的 size 一致
+    };
+  }
+  // 获取商品详情
+  rpc GetProdInfo(ProdRequest) returns (ProdModel) {};
+
+}

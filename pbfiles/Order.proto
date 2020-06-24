@@ -1,0 +1,29 @@
+syntax="proto3";
+package services;
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+message OrderMain {
+  int32 user_id = 1 [(validate.rules).double = { gte: 1,  lte: 99999 }]; //用户ID
+  string order_no = 2; // 订单编号
+  float order_money=3 [(validate.rules).double = { gte: 0,  lte: 10000 }];; // 订单金额
+  google.protobuf.Timestamp order_time=4;// 订单生成时间
+}
+message OrderRequest {
+    OrderMain order_main=1;
+}
+message OrderResponse {
+  string status=1;// 状态
+  string msg=2;
+}
+service OrderService {
+  // 创建一个新订单
+  rpc NewOrder(OrderRequest) returns(OrderResponse){
+    // 支持http
+    option (google.api.http) = {
+      post: "/v1/order"
+      body: "order_main"
+    };
+  }
+}
